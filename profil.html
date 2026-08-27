@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil consultant — Softacess Solution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#003461;--orange:#E77F00;--orange-deep:#C46700;--cream:#F7F4EC;--cream-2:#EFEADB;
+    --ink:#0E1B26;--ink-soft:#4B5A68;--line:rgba(0,52,97,0.14);
+    --display:'Space Grotesk',sans-serif;--mono:'IBM Plex Mono',monospace;--sans:'Manrope',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--cream);color:var(--ink);font-family:var(--sans);min-height:100vh;}
+  a{color:inherit;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--line);background:#fff;}
+  nav a.logo{font-family:var(--display);font-weight:700;font-size:16px;color:var(--navy);text-decoration:none;}
+  nav a.logo span{color:var(--orange);}
+  nav .back-link{font-family:var(--mono);font-size:12.5px;color:var(--navy);text-decoration:none;opacity:0.8;}
+  .p-hero{position:relative;height:340px;overflow:hidden;background:var(--navy);}
+  .p-hero img{width:100%;height:100%;object-fit:cover;object-position:center 20%;opacity:0.92;}
+  .p-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,32,59,0.1) 0%, rgba(0,32,59,0.95) 100%);}
+  .p-hero-text{position:absolute;left:0;right:0;bottom:0;max-width:760px;margin:0 auto;padding:0 24px 28px;z-index:2;color:#fff;}
+  .p-hero-text .p-role{font-family:var(--mono);font-size:12px;color:#FFB65C;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+  .p-hero-text h1{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,3.5vw,2.2rem);}
+  .p-body{max-width:760px;margin:0 auto;padding:40px 24px 90px;}
+  .p-section{margin-bottom:34px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 30px;}
+  .p-section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-deep);margin-bottom:14px;display:block;}
+  .p-section p{font-size:14.5px;color:var(--ink-soft);white-space:pre-line;}
+  .p-chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .p-chip{font-family:var(--mono);font-size:12px;padding:7px 13px;border:1px solid var(--line);border-radius:20px;color:var(--navy);background:var(--cream-2);}
+  .p-contact-row{display:flex;flex-direction:column;gap:10px;font-family:var(--mono);font-size:14px;}
+  .p-contact-row a{color:var(--navy);text-decoration:none;border-bottom:1px solid transparent;}
+  .p-contact-row a:hover{color:var(--orange);border-color:var(--orange);}
+  .contact-btn{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:13.5px;padding:14px 28px;border-radius:30px;background:var(--orange);color:#fff;text-decoration:none;transition:background .3s,transform .3s;}
+  .contact-btn:hover{background:var(--orange-deep);transform:translateY(-2px);}
+  #loadingState, #notFoundState{text-align:center;padding:100px 20px;font-family:var(--mono);color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Softacess <span>Solution</span></a>
+  <a href="annuaire.html" class="back-link">← Retour à l'annuaire</a>
+</nav>
+
+<div id="loadingState">Chargement du profil...</div>
+<div id="profileWrap" style="display:none;">
+  <div class="p-hero">
+    <img id="p-photo" src="" alt="">
+    <div class="p-hero-text">
+      <div class="p-role" id="p-title"></div>
+      <h1 id="p-name"></h1>
+    </div>
+  </div>
+  <div class="p-body">
+    <div class="p-section" id="bio-section">
+      <span class="p-section-label">À propos</span>
+      <p id="p-bio"></p>
+    </div>
+    <div class="p-section" id="experience-section">
+      <span class="p-section-label">Expériences professionnelles</span>
+      <p id="p-experience"></p>
+    </div>
+    <div class="p-section" id="education-section">
+      <span class="p-section-label">Parcours académique</span>
+      <p id="p-education"></p>
+    </div>
+    <div class="p-section" id="achievements-section">
+      <span class="p-section-label">Réalisations</span>
+      <p id="p-achievements"></p>
+    </div>
+    <div class="p-section" id="skills-section">
+      <span class="p-section-label">Compétences</span>
+      <div class="p-chip-row" id="p-skills"></div>
+    </div>
+    <div class="p-section" id="languages-section">
+      <span class="p-section-label">Langues parlées</span>
+      <div class="p-chip-row" id="p-languages"></div>
+    </div>
+    <div class="p-section" id="interests-section">
+      <span class="p-section-label">Centres d'intérêt</span>
+      <div class="p-chip-row" id="p-interests"></div>
+    </div>
+    <div class="p-section" id="location-section">
+      <span class="p-section-label">Localisation</span>
+      <p id="p-location"></p>
+    </div>
+    <div class="p-section">
+      <span class="p-section-label">Contact</span>
+      <div class="p-contact-row" id="p-contact"></div>
+    </div>
+  </div>
+</div>
+<div id="notFoundState" style="display:none;">Ce profil n'existe pas ou n'est plus disponible. <br><a href="annuaire.html" style="color:var(--orange-deep);">← Retour à l'annuaire</a></div>
+
+<script>
+  const SUPABASE_URL = "https://gxvokknynxdeaakocfuq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4dm9ra255bnhkZWFha29jZnVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3OTM5ODgsImV4cCI6MjEwMzM2OTk4OH0.Ir1oPIAyVLPvXEFxcbQFArd2Wl0AMiN1E_8UE5VflCU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function fillList(elId, value) {
+    const el = document.getElementById(elId);
+    const items = (value || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (items.length === 0) {
+      el.closest('.p-section').style.display = 'none';
+      return;
+    }
+    el.innerHTML = items.map(i => `<span class="p-chip">${i}</span>`).join('');
+  }
+
+  function fillText(elId, value) {
+    const el = document.getElementById(elId);
+    if (!value) { el.closest('.p-section').style.display = 'none'; return; }
+    el.textContent = value;
+  }
+
+  async function loadProfile() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) { showNotFound(); return; }
+
+    const { data, error } = await sb.from('consultants').select('*').eq('id', id).eq('is_published', true).maybeSingle();
+
+    if (error || !data) { showNotFound(); return; }
+
+    document.getElementById('p-photo').src = data.photo_url || 'https://via.placeholder.com/760x340/003461/FFFFFF?text=%20';
+    document.getElementById('p-name').textContent = data.full_name || 'Consultant';
+    document.getElementById('p-title').textContent = data.title || '';
+    document.title = (data.full_name || 'Consultant') + ' — Softacess Solution';
+
+    fillText('p-bio', data.bio);
+    fillText('p-experience', data.experience);
+    fillText('p-education', data.education);
+    fillText('p-achievements', data.achievements);
+    fillList('p-skills', data.skills);
+    fillList('p-languages', data.languages);
+    fillList('p-interests', data.interests);
+
+    const loc = [data.location, data.country].filter(Boolean).join(', ');
+    fillText('p-location', loc);
+
+    const contactEl = document.getElementById('p-contact');
+    let contactHtml = '';
+    if (data.contact_email) contactHtml += `<a href="mailto:${data.contact_email}">${data.contact_email}</a>`;
+    if (data.contact_phone) contactHtml += `<a href="tel:${data.contact_phone}">${data.contact_phone}</a>`;
+    if (data.contact_email) contactHtml += `<a href="mailto:${data.contact_email}" class="contact-btn">Contacter ce consultant</a>`;
+    contactEl.innerHTML = contactHtml || '<p style="color:var(--ink-soft);font-size:13.5px;">Aucun contact renseigné.</p>';
+
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('profileWrap').style.display = 'block';
+  }
+
+  function showNotFound() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('notFoundState').style.display = 'block';
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>

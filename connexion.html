@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Softacess Solution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#003461;--orange:#E77F00;--orange-deep:#C46700;--cream:#F7F4EC;
+    --ink:#0E1B26;--ink-soft:#4B5A68;--line:rgba(0,52,97,0.14);
+    --display:'Space Grotesk',sans-serif;--mono:'IBM Plex Mono',monospace;--sans:'Manrope',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--cream);color:var(--ink);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+  a{color:inherit;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--line);}
+  nav a.logo{font-family:var(--display);font-weight:700;font-size:16px;color:var(--navy);text-decoration:none;}
+  nav a.logo span{color:var(--orange);}
+  nav .nav-link{font-family:var(--mono);font-size:12.5px;color:var(--navy);text-decoration:none;opacity:0.75;}
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:44px 40px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,52,97,0.08);}
+  .eyebrow{font-family:var(--mono);font-size:12px;color:var(--orange-deep);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;}
+  h1{font-family:var(--display);font-weight:700;font-size:24px;color:var(--navy);margin-bottom:26px;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .field label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);}
+  .field input{font-family:var(--sans);font-size:14.5px;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff;}
+  .field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(231,127,0,0.14);}
+  .submit-btn{width:100%;font-family:var(--mono);font-size:13.5px;padding:14px;border-radius:30px;border:none;background:var(--orange);color:#fff;cursor:pointer;margin-top:6px;transition:background .3s,transform .3s;}
+  .submit-btn:hover{background:var(--orange-deep);transform:translateY(-2px);}
+  .submit-btn:disabled{opacity:0.6;cursor:wait;}
+  .status{margin-top:16px;font-family:var(--mono);font-size:13px;text-align:center;padding:12px;border-radius:10px;display:none;}
+  .status.success{display:block;background:rgba(47,120,90,0.1);color:#2F785A;}
+  .status.error{display:block;background:rgba(200,60,40,0.1);color:#C43C28;}
+  .switch-link{margin-top:22px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--ink-soft);}
+  .switch-link a{color:var(--orange-deep);text-decoration:none;border-bottom:1px solid var(--orange-deep);}
+  .forgot{display:block;text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);margin:-8px 0 18px;cursor:pointer;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Softacess <span>Solution</span></a>
+  <a href="annuaire.html" class="nav-link">Voir l'annuaire</a>
+</nav>
+<main>
+  <div class="panel">
+    <div class="eyebrow">Espace consultant</div>
+    <h1>Se connecter</h1>
+    <form id="loginForm">
+      <div class="field">
+        <label for="li-email">Email</label>
+        <input type="email" id="li-email" required>
+      </div>
+      <div class="field">
+        <label for="li-password">Mot de passe</label>
+        <input type="password" id="li-password" required>
+      </div>
+      <span class="forgot" id="forgotLink">Mot de passe oublié ?</span>
+      <button type="submit" class="submit-btn" id="li-btn">Se connecter</button>
+      <div class="status" id="li-status"></div>
+    </form>
+    <div class="switch-link">Pas encore de compte ? <a href="inscription.html">Créer ma page consultant</a></div>
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL = "https://gxvokknynxdeaakocfuq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4dm9ra255bnhkZWFha29jZnVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3OTM5ODgsImV4cCI6MjEwMzM2OTk4OH0.Ir1oPIAyVLPvXEFxcbQFArd2Wl0AMiN1E_8UE5VflCU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById('loginForm');
+  const statusEl = document.getElementById('li-status');
+  const btn = document.getElementById('li-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = 'Connexion...';
+    statusEl.className = 'status';
+
+    const email = document.getElementById('li-email').value.trim();
+    const password = document.getElementById('li-password').value;
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      statusEl.classList.add('error');
+      statusEl.textContent = "Erreur : " + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+      return;
+    }
+
+    statusEl.classList.add('success');
+    statusEl.textContent = "Connexion réussie. Redirection...";
+    setTimeout(() => window.location.href = 'mon-compte.html', 800);
+  });
+
+  document.getElementById('forgotLink').addEventListener('click', async () => {
+    const email = prompt("Entrez votre email pour recevoir un lien de réinitialisation :");
+    if (!email) return;
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+    if (error) {
+      alert("Erreur : " + error.message);
+    } else {
+      alert("Un email de réinitialisation a été envoyé si ce compte existe.");
+    }
+  });
+</script>
+</body>
+</html>

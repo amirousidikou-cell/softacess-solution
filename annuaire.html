@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annuaire des consultants — Softacess Solution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#003461;--orange:#E77F00;--orange-deep:#C46700;--cream:#F7F4EC;--cream-2:#EFEADB;
+    --ink:#0E1B26;--ink-soft:#4B5A68;--line:rgba(0,52,97,0.14);
+    --display:'Space Grotesk',sans-serif;--mono:'IBM Plex Mono',monospace;--sans:'Manrope',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--cream);color:var(--ink);font-family:var(--sans);min-height:100vh;}
+  a{color:inherit;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--line);background:#fff;}
+  nav a.logo{font-family:var(--display);font-weight:700;font-size:16px;color:var(--navy);text-decoration:none;}
+  nav a.logo span{color:var(--orange);}
+  nav .nav-right{display:flex;align-items:center;gap:20px;font-family:var(--mono);font-size:12.5px;}
+  nav .nav-right a{color:var(--navy);text-decoration:none;opacity:0.8;}
+  .cta-pill{background:var(--orange)!important;color:#fff!important;padding:9px 18px;border-radius:20px;opacity:1!important;}
+  .header{max-width:1100px;margin:0 auto;padding:56px 24px 0;}
+  .eyebrow{font-family:var(--mono);font-size:12px;color:var(--orange-deep);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,3.5vw,2.6rem);color:var(--navy);margin-bottom:14px;}
+  .sub{color:var(--ink-soft);font-size:16px;max-width:560px;margin-bottom:36px;}
+  .filters{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px;}
+  .filters input, .filters select{
+    font-family:var(--sans);font-size:14px;padding:12px 16px;border:1.5px solid var(--line);border-radius:30px;background:#fff;color:var(--ink);
+  }
+  .filters input{flex:1;min-width:220px;}
+  .filters input:focus, .filters select:focus{outline:none;border-color:var(--orange);}
+  .grid{max-width:1100px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;text-decoration:none;color:var(--ink);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;}
+  .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,52,97,0.1);}
+  .card-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--cream-2);margin-bottom:16px;}
+  .card-name{font-family:var(--display);font-weight:600;font-size:17px;color:var(--navy);margin-bottom:4px;}
+  .card-title{font-family:var(--mono);font-size:12px;color:var(--orange-deep);margin-bottom:12px;}
+  .card-loc{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:12px;}
+  .card-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;}
+  .card-chip{font-family:var(--mono);font-size:10.5px;padding:5px 10px;border-radius:14px;background:var(--cream-2);color:var(--navy);}
+  #emptyState, #loadingState{grid-column:1/-1;text-align:center;padding:60px 20px;font-family:var(--mono);color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Softacess <span>Solution</span></a>
+  <div class="nav-right">
+    <a href="index.html">Accueil</a>
+    <a href="connexion.html">Connexion</a>
+    <a href="inscription.html" class="cta-pill">Devenir consultant</a>
+  </div>
+</nav>
+
+<div class="header">
+  <div class="eyebrow">Annuaire</div>
+  <h1>Trouvez le bon consultant, en France ou en Afrique.</h1>
+  <p class="sub">Des profils vérifiés en contrôle de gestion, audit, structuration financière et bien plus — mis en relation directe avec votre entreprise.</p>
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Rechercher par nom, titre, compétence...">
+    <select id="countryFilter">
+      <option value="">Tous les pays</option>
+    </select>
+  </div>
+</div>
+
+<div class="grid" id="grid">
+  <div id="loadingState">Chargement de l'annuaire...</div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://gxvokknynxdeaakocfuq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4dm9ra255bnhkZWFha29jZnVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3OTM5ODgsImV4cCI6MjEwMzM2OTk4OH0.Ir1oPIAyVLPvXEFxcbQFArd2Wl0AMiN1E_8UE5VflCU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let allConsultants = [];
+
+  function renderCards(list) {
+    const grid = document.getElementById('grid');
+    if (list.length === 0) {
+      grid.innerHTML = '<div id="emptyState">Aucun consultant ne correspond à votre recherche.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(c => {
+      const photo = c.photo_url || 'https://via.placeholder.com/64/EFEADB/003461?text=%20';
+      const loc = [c.location, c.country].filter(Boolean).join(', ');
+      const skillsArr = (c.skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+      return `
+        <a class="card" href="profil.html?id=${c.id}">
+          <img class="card-photo" src="${photo}" alt="${c.full_name}">
+          <div class="card-name">${c.full_name || 'Consultant'}</div>
+          <div class="card-title">${c.title || ''}</div>
+          ${loc ? `<div class="card-loc">${loc}</div>` : ''}
+          <div class="card-chips">${skillsArr.map(s => `<span class="card-chip">${s}</span>`).join('')}</div>
+        </a>`;
+    }).join('');
+  }
+
+  function populateCountryFilter(list) {
+    const countries = [...new Set(list.map(c => c.country).filter(Boolean))].sort();
+    const select = document.getElementById('countryFilter');
+    countries.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      select.appendChild(opt);
+    });
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const country = document.getElementById('countryFilter').value;
+    const filtered = allConsultants.filter(c => {
+      const matchesQuery = !q || [c.full_name, c.title, c.skills, c.languages].join(' ').toLowerCase().includes(q);
+      const matchesCountry = !country || c.country === country;
+      return matchesQuery && matchesCountry;
+    });
+    renderCards(filtered);
+  }
+
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+  document.getElementById('countryFilter').addEventListener('change', applyFilters);
+
+  async function loadConsultants() {
+    const { data, error } = await sb.from('consultants').select('*').eq('is_published', true).order('created_at', { ascending: false });
+    if (error) {
+      document.getElementById('grid').innerHTML = '<div id="emptyState">Erreur de chargement : ' + error.message + '</div>';
+      return;
+    }
+    allConsultants = data || [];
+    populateCountryFilter(allConsultants);
+    renderCards(allConsultants);
+  }
+
+  loadConsultants();
+</script>
+</body>
+</html>
