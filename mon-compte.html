@@ -218,13 +218,15 @@
     if (error) {
       statusEl.classList.add('error');
       statusEl.textContent = "Erreur : " + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer mon profil';
     } else {
       statusEl.classList.add('success');
-      statusEl.textContent = "Profil enregistré avec succès.";
+      statusEl.textContent = "Profil enregistré avec succès. Retour à l'accueil...";
       currentPhotoUrl = photoUrl;
+      btn.textContent = 'Enregistré ✓';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
     }
-    btn.disabled = false;
-    btn.textContent = 'Enregistrer mon profil';
   });
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
