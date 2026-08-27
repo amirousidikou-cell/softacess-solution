@@ -261,6 +261,16 @@
   .bridge-node.pulse{animation:nodePulse 2s ease-in-out infinite;}
   @keyframes nodePulse{0%,100%{r:5;}50%{r:7;}}
 
+  /* ---------- Consultants marquee ---------- */
+  .marquee-outer{overflow:hidden;padding:10px 0 20px;-webkit-mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent);mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent);}
+  .marquee-track{display:flex;gap:22px;width:max-content;animation:marqueeScroll 45s linear infinite;padding:0 24px;}
+  .marquee-track:hover{animation-play-state:paused;}
+  @keyframes marqueeScroll{from{transform:translateX(-50%);}to{transform:translateX(0%);}}
+  .m-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:32px;width:340px;flex-shrink:0;box-shadow:0 20px 50px rgba(0,52,97,0.06);}
+  .m-card .role{font-family:var(--mono);font-size:12px;color:var(--orange-deep);text-transform:uppercase;letter-spacing:0.08em;}
+  .m-card h3{font-family:var(--display);font-weight:700;font-size:20px;color:var(--navy);margin:10px 0 14px;}
+  .m-card p{font-size:14px;color:var(--ink-soft);margin-bottom:18px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+
   /* ---------- Founder ---------- */
   .founder-row{display:grid;grid-template-columns:0.9fr 1.1fr;gap:56px;align-items:center;}
   .founder-card{
@@ -428,6 +438,7 @@
     .consultant-body{padding:26px 22px 32px;max-height:calc(88vh - 260px);}
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="page-top"></div>
@@ -588,34 +599,18 @@
   </div>
 </section>
 
-<!-- CONSULTANT TEASER -->
+<!-- CONSULTANTS CAROUSEL -->
 <section id="fondateur">
   <div class="wrap">
-    <div class="founder-row">
-      <div class="founder-card reveal">
-        <div class="role">Consultant</div>
-        <h3>Abdou Salifou Sidikou</h3>
-        <p>Consultant en contrôle de gestion et finance chez Softacess Solution. Formé à l'audit, au contrôle de gestion et à l'ingénierie financière, avec une expérience construite sur des terrains exigeants : financements structurés, pilotage financier multi-entités, contrôle financier opérationnel.</p>
-        <div class="lang-strip">
-          <span class="lang-chip">Français</span>
-          <span class="lang-chip">Anglais</span>
-          <span class="lang-chip">Haoussa</span>
-          <span class="lang-chip">Zarma</span>
-          <span class="lang-chip">Peul</span>
-        </div>
-        <span class="magnetic-wrap"><a href="#" class="btn btn-ghost" id="openConsultantProfile" style="margin-top:22px;">Voir le profil complet</a></span>
-      </div>
-      <div class="reveal reveal-delay-1">
-        <span class="section-num">Consultant</span>
-        <h2>Une rigueur de contrôleur de gestion, appliquée à chaque mission.</h2>
-        <p class="section-lede">De la clôture financière chez de grands groupes industriels au pilotage multi-entités, la même exigence : des données fiables, des recommandations actionnables, et un accès direct au terrain grâce à la langue.</p>
-        <div class="tools-list">
-          <span class="tool-tag">Excel avancé — VBA</span>
-          <span class="tool-tag">Sage X3</span>
-          <span class="tool-tag">Power BI</span>
-          <span class="tool-tag">SQL</span>
-        </div>
-      </div>
+    <div class="section-head reveal">
+      <span class="section-num">Consultants</span>
+      <h2>Une rigueur de contrôleur de gestion, appliquée à chaque mission.</h2>
+      <p class="section-lede">Découvrez les consultants du réseau Softacess Solution, en France comme en Afrique.</p>
+    </div>
+  </div>
+  <div class="marquee-outer reveal">
+    <div class="marquee-track" id="marqueeTrack">
+      <div id="marqueeLoading" style="font-family:var(--mono);font-size:13px;color:var(--ink-soft);padding:40px;">Chargement des consultants...</div>
     </div>
   </div>
 </section>
@@ -949,10 +944,13 @@
     e.preventDefault();
     openModal(consultantModal);
   });
-  document.getElementById('openConsultantProfile').addEventListener('click', (e) => {
-    e.preventDefault();
-    openModal(consultantModal);
-  });
+  const openConsultantBtn = document.getElementById('openConsultantProfile');
+  if (openConsultantBtn) {
+    openConsultantBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal(consultantModal);
+    });
+  }
 
   // ============ FIREWORKS ============
   function spawnFireworks(x, y){
@@ -1045,6 +1043,51 @@
       cfSubmitBtn.textContent = 'Envoyer';
     }
   });
+
+  // ============ CONSULTANTS MARQUEE ============
+  const SB_URL = "https://zshtamjatpiyrhxsdokk.supabase.co";
+  const SB_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzaHRhbWphdHBpeXJoeHNkb2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NzEzMjgsImV4cCI6MjEwMzM0NzMyOH0.ARLmbQ-rahdHXu_yuEhZM7nbp5iOlYvcUkamfz7OGs8";
+  const sbMarquee = supabase.createClient(SB_URL, SB_ANON_KEY);
+
+  async function loadMarquee() {
+    const track = document.getElementById('marqueeTrack');
+    const { data, error } = await sbMarquee.from('consultants').select('*').eq('is_published', true).order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      track.innerHTML = '<div style="font-family:var(--mono);font-size:13px;color:var(--ink-soft);padding:40px;">Aucun consultant publié pour le moment.</div>';
+      return;
+    }
+
+    const cardHtml = (c) => {
+      const langs = (c.languages || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 5);
+      return `
+        <div class="m-card">
+          <div class="role">Consultant</div>
+          <h3>${c.full_name || 'Consultant'}</h3>
+          <p>${c.bio || c.title || ''}</p>
+          <div class="lang-strip">${langs.map(l => `<span class="lang-chip">${l}</span>`).join('')}</div>
+          <span class="magnetic-wrap"><a href="profil.html?id=${c.id}" class="btn btn-ghost" style="margin-top:20px;">Voir le profil complet</a></span>
+        </div>`;
+    };
+
+    // Duplicate the list for a seamless infinite scroll loop
+    const cardsHtml = data.map(cardHtml).join('');
+    track.innerHTML = cardsHtml + cardsHtml;
+
+    // Re-apply magnetic button effect to newly injected buttons
+    track.querySelectorAll('.magnetic-wrap').forEach(wrap => {
+      const btn = wrap.querySelector('a');
+      wrap.addEventListener('mousemove', (e) => {
+        const rect = wrap.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px) translateY(-3px)`;
+      });
+      wrap.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    });
+  }
+
+  loadMarquee();
 </script>
 
 </body>
