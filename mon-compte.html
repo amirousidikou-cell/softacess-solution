@@ -102,6 +102,20 @@
         <div class="field"><label for="pf-name">Nom complet</label><input type="text" id="pf-name" required></div>
         <div class="field"><label for="pf-title">Titre / zone de compétence</label><input type="text" id="pf-title" required></div>
       </div>
+      <div class="field">
+        <label for="pf-category">Secteur d'expertise (affiché dans l'annuaire par catégorie)</label>
+        <select id="pf-category" required>
+          <option value="">Sélectionner un secteur</option>
+          <option value="informatique-ingenierie">Informatique & Ingénierie</option>
+          <option value="finance-economie">Finance & Économie</option>
+          <option value="communication-marketing">Communication & Marketing</option>
+          <option value="droit-juridique">Droit & Juridique</option>
+          <option value="btp-construction">BTP & Construction</option>
+          <option value="architecture">Architecture</option>
+          <option value="e-commerce">E-commerce</option>
+          <option value="animation-3d">Animation & Modélisation 3D</option>
+        </select>
+      </div>
       <div class="field"><label for="pf-bio">Présentation courte</label><textarea id="pf-bio"></textarea></div>
 
       <span class="section-label">Parcours</span>
@@ -156,6 +170,7 @@
     if (profile) {
       document.getElementById('pf-name').value = profile.full_name || '';
       document.getElementById('pf-title').value = profile.title || '';
+      document.getElementById('pf-category').value = profile.category || '';
       document.getElementById('pf-bio').value = profile.bio || '';
       document.getElementById('pf-experience').value = profile.experience || '';
       document.getElementById('pf-education').value = profile.education || '';
@@ -217,6 +232,7 @@
       id: currentUser.id,
       full_name: document.getElementById('pf-name').value.trim(),
       title: document.getElementById('pf-title').value.trim(),
+      category: document.getElementById('pf-category').value,
       bio: document.getElementById('pf-bio').value.trim(),
       experience: document.getElementById('pf-experience').value.trim(),
       education: document.getElementById('pf-education').value.trim(),
