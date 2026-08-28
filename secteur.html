@@ -51,10 +51,10 @@
 </nav>
 
 <div class="header">
-  <a href="/" class="back-link">\u2190 Retour \u00e0 l'accueil</a>
+  <a href="/" class="back-link">← Retour à l'accueil</a>
   <div class="eyebrow">Secteur</div>
   <h1 id="categoryTitle">Consultants</h1>
-  <p class="sub" id="categorySub">D\u00e9couvrez les consultants sp\u00e9cialis\u00e9s dans ce secteur.</p>
+  <p class="sub" id="categorySub">Découvrez les consultants spécialisés dans ce secteur.</p>
 </div>
 
 <div class="grid" id="grid">
@@ -67,20 +67,20 @@
   const sb = supabase.createClient(SB_URL, SB_ANON_KEY);
 
   const CATEGORIES = {
-    "informatique-ingenierie": "Informatique & Ing\u00e9nierie",
-    "finance-economie": "Finance & \u00c9conomie",
+    "informatique-ingenierie": "Informatique & Ingénierie",
+    "finance-economie": "Finance & Économie",
     "communication-marketing": "Communication & Marketing",
     "droit-juridique": "Droit & Juridique",
     "btp-construction": "BTP & Construction",
     "architecture": "Architecture",
     "e-commerce": "E-commerce",
-    "animation-3d": "Animation & Mod\u00e9lisation 3D"
+    "animation-3d": "Animation & Modélisation 3D"
   };
 
   function renderCards(list) {
     const grid = document.getElementById('grid');
     if (list.length === 0) {
-      grid.innerHTML = '<div id="emptyState">Aucun consultant publi\u00e9 dans ce secteur pour le moment.</div>';
+      grid.innerHTML = '<div id="emptyState">Aucun consultant publié dans ce secteur pour le moment.</div>';
       return;
     }
     grid.innerHTML = list.map(c => {
@@ -104,7 +104,7 @@
     const label = CATEGORIES[cat] || 'Consultants';
 
     document.getElementById('categoryTitle').textContent = label;
-    document.getElementById('categorySub').textContent = `D\u00e9couvrez les consultants sp\u00e9cialis\u00e9s en ${label}.`;
+    document.getElementById('categorySub').textContent = `Découvrez les consultants spécialisés en ${label}.`;
     document.title = label + ' — Softacess Solution';
 
     if (!cat) {
