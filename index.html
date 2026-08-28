@@ -954,9 +954,9 @@
         <div class="m-card">
           <div class="m-card-photo"><img src="${photo}" alt="${c.full_name || 'Consultant'}"></div>
           <div class="m-card-body">
-            <div class="role">Consultant</div>
+            <div class="role">${c.title || 'Consultant'}</div>
             <h3>${c.full_name || 'Consultant'}</h3>
-            <p>${c.bio || c.title || ''}</p>
+            ${c.bio ? `<p>${c.bio}</p>` : ''}
             <div class="lang-strip">${langs.map(l => `<span class="lang-chip">${l}</span>`).join('')}</div>
             <span class="magnetic-wrap"><a href="profil.html?id=${c.id}" class="btn btn-ghost">Voir le profil complet</a></span>
           </div>
