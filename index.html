@@ -157,20 +157,34 @@
     100%{offset-distance:100%;opacity:1;}
   }
   .sectors-grid{
-    position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:22px;
+    position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
     padding-top:30px;
   }
   .sector-card{
-    background:rgba(245,241,230,0.045);border:1px solid var(--line);border-radius:20px;padding:38px 28px;
-    transition:transform .3s, background .3s, border-color .3s;
-    min-height:220px;display:flex;flex-direction:column;
+    background:rgba(245,241,230,0.045);border:1px solid var(--line);border-radius:20px;padding:32px 26px;
+    transition:transform .1s ease-out, background .3s, border-color .3s, box-shadow .3s;
+    min-height:210px;display:flex;flex-direction:column;
+    text-decoration:none;cursor:pointer;position:relative;overflow:hidden;
+    transform-style:preserve-3d;will-change:transform;
   }
-  .sector-card:hover{transform:translateY(-6px);background:rgba(245,241,230,0.08);border-color:rgba(231,127,0,0.45);}
-  .sector-icon{font-size:30px;margin-bottom:16px;}
-  .sector-num{font-family:var(--mono);font-size:12px;color:var(--orange);}
-  .sector-card h3{font-family:var(--display);font-weight:600;font-size:20px;margin:12px 0 10px;color:var(--text-hi);line-height:1.25;}
-  .sector-card p{color:var(--text-mid);font-size:14px;flex:1;}
+  .sector-card::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(231,127,0,0.16), transparent 60%);
+    opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  .sector-card:hover{background:rgba(245,241,230,0.08);border-color:rgba(231,127,0,0.5);box-shadow:0 20px 40px rgba(0,0,0,0.35);}
+  .sector-card:hover::before{opacity:1;}
+  .sector-icon{font-size:28px;margin-bottom:14px;}
+  .sector-num{font-family:var(--mono);font-size:11.5px;color:var(--orange);}
+  .sector-card h3{font-family:var(--display);font-weight:600;font-size:18px;margin:10px 0 8px;color:var(--text-hi);line-height:1.25;}
+  .sector-card p{color:var(--text-mid);font-size:13.5px;flex:1;}
+  .sector-link{
+    font-family:var(--mono);font-size:11.5px;color:var(--orange-light);margin-top:14px;
+    opacity:0;transform:translateX(-6px);transition:opacity .3s, transform .3s;
+  }
+  .sector-card:hover .sector-link{opacity:1;transform:translateX(0);}
   @media (max-width:1000px){.sectors-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.sectors-grid{grid-template-columns:1fr;}}
 
   /* ============ SECTION 3 : PORTÉE / MAP ============ */
   .reach-section{position:relative;padding-top:160px;}
@@ -352,30 +366,62 @@
         <path d="M2 21l21-9L2 3v7l15 2-15 2z"></path>
       </svg>
       <div class="sectors-grid">
-        <div class="sector-card reveal">
+        <a href="secteur.html?cat=informatique-ingenierie" class="sector-card reveal tilt-sector">
           <div class="sector-icon">💻</div>
           <div class="sector-num">01</div>
           <h3>Informatique & Ingénierie</h3>
           <p>Développement logiciel, data, cybersécurité, ingénierie industrielle, infrastructure et systèmes.</p>
-        </div>
-        <div class="sector-card reveal reveal-delay-1">
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=finance-economie" class="sector-card reveal reveal-delay-1 tilt-sector">
           <div class="sector-icon">📊</div>
           <div class="sector-num">02</div>
           <h3>Finance & Économie</h3>
           <p>Contrôle de gestion, audit, structuration financière, analyse économique et stratégie d'investissement.</p>
-        </div>
-        <div class="sector-card reveal reveal-delay-2">
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=communication-marketing" class="sector-card reveal reveal-delay-2 tilt-sector">
           <div class="sector-icon">📣</div>
           <div class="sector-num">03</div>
           <h3>Communication & Marketing</h3>
           <p>Stratégie de marque, création de contenu, marketing digital, relations presse et publiques.</p>
-        </div>
-        <div class="sector-card reveal reveal-delay-3">
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=droit-juridique" class="sector-card reveal reveal-delay-3 tilt-sector">
           <div class="sector-icon">⚖️</div>
           <div class="sector-num">04</div>
           <h3>Droit & Juridique</h3>
           <p>Droit des affaires, conformité réglementaire, contrats internationaux et fiscalité.</p>
-        </div>
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=btp-construction" class="sector-card reveal tilt-sector">
+          <div class="sector-icon">🏗️</div>
+          <div class="sector-num">05</div>
+          <h3>BTP & Construction</h3>
+          <p>Maîtrise d'œuvre, conduite de travaux, génie civil et gestion de chantier.</p>
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=architecture" class="sector-card reveal reveal-delay-1 tilt-sector">
+          <div class="sector-icon">📐</div>
+          <div class="sector-num">06</div>
+          <h3>Architecture</h3>
+          <p>Conception architecturale, urbanisme, modélisation BIM et suivi de projet.</p>
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=e-commerce" class="sector-card reveal reveal-delay-2 tilt-sector">
+          <div class="sector-icon">🛒</div>
+          <div class="sector-num">07</div>
+          <h3>E-commerce</h3>
+          <p>Stratégie de vente en ligne, gestion de marketplace, logistique et expérience client.</p>
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
+        <a href="secteur.html?cat=animation-3d" class="sector-card reveal reveal-delay-3 tilt-sector">
+          <div class="sector-icon">🎨</div>
+          <div class="sector-num">08</div>
+          <h3>Animation & Modélisation 3D</h3>
+          <p>Création 3D, animation, motion design et effets visuels.</p>
+          <span class="sector-link">Voir les consultants →</span>
+        </a>
       </div>
     </div>
   </div>
@@ -445,9 +491,9 @@
       </div>
       <div class="founder-text reveal reveal-delay-1">
         <span class="section-num">Pourquoi Softacess</span>
-        <p class="founder-quote">« Notre génération est <span class="accent">talentueuse</span>. Il était temps que ses compétences servent aussi son continent. »</p>
-        <p>Après plusieurs années d'expérience en finance et en contrôle de gestion, en France et ailleurs, j'ai fait un constat simple : nous sommes nombreux, formés, expérimentés — et pourtant nos compétences restent trop souvent déconnectées des besoins réels de l'Afrique.</p>
-        <p>J'ai fondé Softacess Solution pour créer ce pont : donner à des consultants experts, où qu'ils soient, un accès direct aux entreprises qui ont besoin d'eux — et donner à ces entreprises un accès direct à des compétences de confiance.</p>
+        <p class="founder-quote">« Des diplômés brillants, sans opportunités. Il fallait changer la donne. »</p>
+        <p>Le constat est simple : partout en France et en Europe, de nombreux jeunes Africains sortent de leurs études avec d'excellents diplômes — et peinent pourtant à trouver un contrat dès la sortie de l'école, ou dans les mois qui suivent. Un vrai gâchis, tant ces profils sont compétents, les uns comme les autres.</p>
+        <p>Ce constat nous a menés à une question simple : pourquoi ne pas mettre ces profils en relation directe avec les entreprises et les particuliers qui ont besoin d'expertise dans leur domaine ? C'est cette conviction qui a donné naissance à Softacess Solution.</p>
       </div>
     </div>
   </div>
@@ -479,7 +525,6 @@
     <div class="contact-grid reveal">
       <div class="contact-links">
         <a href="mailto:contact.softacess@gmail.com">contact.softacess@gmail.com</a>
-        <a href="tel:+33753016339">+33 7 53 01 63 39</a>
       </div>
       <span class="magnetic-wrap"><a href="#" class="btn btn-primary js-contact-trigger">Discutons de votre projet</a></span>
     </div>
@@ -571,6 +616,23 @@
     entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
   }, { threshold: 0.15 });
   revealEls.forEach(el => revealObserver.observe(el));
+
+  // Sector cards: mouse-tracking tilt + glow
+  document.querySelectorAll('.tilt-sector').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotateX = ((y / rect.height) - 0.5) * -8;
+      const rotateY = ((x / rect.width) - 0.5) * 8;
+      card.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+      card.style.setProperty('--mx', (x / rect.width) * 100 + '%');
+      card.style.setProperty('--my', (y / rect.height) * 100 + '%');
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(700px) rotateX(0) rotateY(0) translateY(0)';
+    });
+  });
 
   // Paper plane flight, replays every time the sectors section re-enters view
   const planeStage = document.getElementById('planeStage');
