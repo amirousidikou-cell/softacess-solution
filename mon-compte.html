@@ -98,12 +98,9 @@
       </div>
 
       <span class="section-label">Identité</span>
-      <div class="row2">
-        <div class="field"><label for="pf-name">Nom complet</label><input type="text" id="pf-name" required></div>
-        <div class="field"><label for="pf-title">Titre / zone de compétence</label><input type="text" id="pf-title" required></div>
-      </div>
+      <div class="field"><label for="pf-name">Nom complet</label><input type="text" id="pf-name" required></div>
       <div class="field">
-        <label for="pf-category">Secteur d'expertise (affiché dans l'annuaire par catégorie)</label>
+        <label for="pf-category">Grand secteur d'expertise</label>
         <select id="pf-category" required>
           <option value="">Sélectionner un secteur</option>
           <option value="informatique-ingenierie">Informatique & Ingénierie</option>
@@ -115,6 +112,10 @@
           <option value="e-commerce">E-commerce</option>
           <option value="animation-3d">Animation & Modélisation 3D</option>
         </select>
+      </div>
+      <div class="field">
+        <label for="pf-title">Titre / branche métier précise</label>
+        <input type="text" id="pf-title" placeholder="Ex : Développeur backend, Architecte d'intérieur, Fiscaliste international..." required>
       </div>
       <div class="field"><label for="pf-bio">Présentation courte</label><textarea id="pf-bio"></textarea></div>
 
