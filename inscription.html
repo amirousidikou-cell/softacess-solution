@@ -29,8 +29,8 @@
   .sub{color:var(--ink-soft);font-size:14px;margin-bottom:28px;}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
   .field label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);}
-  .field input{font-family:var(--sans);font-size:14.5px;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff;}
-  .field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(231,127,0,0.14);}
+  .field input, .field select{font-family:var(--sans);font-size:14.5px;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff;width:100%;}
+  .field input:focus, .field select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(231,127,0,0.14);}
   .submit-btn{width:100%;font-family:var(--mono);font-size:13.5px;padding:14px;border-radius:30px;border:none;background:var(--orange);color:#fff;cursor:pointer;margin-top:6px;transition:background .3s,transform .3s;}
   .submit-btn:hover{background:var(--orange-deep);transform:translateY(-2px);}
   .submit-btn:disabled{opacity:0.6;cursor:wait;}
@@ -57,7 +57,21 @@
         <input type="text" id="su-name" required>
       </div>
       <div class="field">
-        <label for="su-title">Titre / zone de compétence</label>
+        <label for="su-category">Grand secteur d'expertise</label>
+        <select id="su-category" required>
+          <option value="">Sélectionner un secteur</option>
+          <option value="informatique-ingenierie">Informatique & Ingénierie</option>
+          <option value="finance-economie">Finance & Économie</option>
+          <option value="communication-marketing">Communication & Marketing</option>
+          <option value="droit-juridique">Droit & Juridique</option>
+          <option value="btp-construction">BTP & Construction</option>
+          <option value="architecture">Architecture</option>
+          <option value="e-commerce">E-commerce</option>
+          <option value="animation-3d">Animation & Modélisation 3D</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="su-title">Titre / branche métier précise</label>
         <input type="text" id="su-title" placeholder="Ex : Consultant en audit financier" required>
       </div>
       <div class="field">
@@ -91,6 +105,7 @@
     statusEl.className = 'status';
 
     const fullName = document.getElementById('su-name').value.trim();
+    const category = document.getElementById('su-category').value;
     const title = document.getElementById('su-title').value.trim();
     const email = document.getElementById('su-email').value.trim();
     const password = document.getElementById('su-password').value;
@@ -109,6 +124,7 @@
       const { error: insertError } = await sb.from('consultants').insert({
         id: data.user.id,
         full_name: fullName,
+        category: category,
         title: title,
         contact_email: email,
         is_published: false
