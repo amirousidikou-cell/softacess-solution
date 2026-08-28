@@ -50,6 +50,15 @@
   .view-link{font-family:var(--mono);font-size:12.5px;color:var(--orange-deep);text-decoration:none;border-bottom:1px solid var(--orange-deep);margin-left:16px;}
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-deep);margin:26px 0 14px;display:block;border-top:1px solid var(--line);padding-top:22px;}
   .section-label:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+  .entry-card{background:var(--cream-2);border:1px solid var(--line);border-radius:12px;padding:20px 20px 6px;margin-bottom:14px;position:relative;}
+  .entry-remove{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--ink-soft);font-family:var(--mono);font-size:14px;cursor:pointer;line-height:1;}
+  .entry-remove:hover{background:#C43C28;color:#fff;border-color:#C43C28;}
+  .entry-row3{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .date-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+  .date-row .field{margin-bottom:14px;}
+  .current-check{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);padding-bottom:22px;white-space:nowrap;}
+  .add-entry-btn{font-family:var(--mono);font-size:12.5px;color:var(--orange-deep);background:none;border:1.5px dashed var(--orange-deep);border-radius:10px;padding:10px 16px;cursor:pointer;margin-bottom:8px;transition:background .25s;}
+  .add-entry-btn:hover{background:rgba(231,127,0,0.08);}
   #loadingMsg{text-align:center;padding:80px 20px;font-family:var(--mono);color:var(--ink-soft);}
 
   .nav-toggle{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:none;border:none;cursor:pointer;padding:0;}
@@ -119,10 +128,24 @@
       </div>
       <div class="field"><label for="pf-bio">Présentation courte</label><textarea id="pf-bio"></textarea></div>
 
-      <span class="section-label">Parcours</span>
-      <div class="field"><label for="pf-experience">Expériences professionnelles</label><textarea id="pf-experience" placeholder="Une expérience par ligne : Poste — Entreprise — Période"></textarea></div>
-      <div class="field"><label for="pf-education">Parcours académique</label><textarea id="pf-education"></textarea></div>
-      <div class="field"><label for="pf-achievements">Réalisations</label><textarea id="pf-achievements"></textarea></div>
+      <span class="section-label">Expériences professionnelles</span>
+      <div id="expContainer"></div>
+      <button type="button" class="add-entry-btn" id="addExpBtn">+ Ajouter une expérience</button>
+
+      <span class="section-label">Parcours académique</span>
+      <div id="eduContainer"></div>
+      <button type="button" class="add-entry-btn" id="addEduBtn">+ Ajouter une formation</button>
+
+      <span class="section-label">Projets réalisés</span>
+      <div class="field"><label for="pf-proj-count">Nombre total de projets réalisés</label><input type="number" id="pf-proj-count" min="0" placeholder="Ex : 12"></div>
+      <div id="projContainer"></div>
+      <button type="button" class="add-entry-btn" id="addProjBtn">+ Ajouter un projet</button>
+
+      <span class="section-label">Liens professionnels</span>
+      <div class="row2">
+        <div class="field"><label for="pf-github">GitHub</label><input type="url" id="pf-github" placeholder="https://github.com/votre-profil"></div>
+        <div class="field"><label for="pf-linkedin">LinkedIn</label><input type="url" id="pf-linkedin" placeholder="https://linkedin.com/in/votre-profil"></div>
+      </div>
 
       <span class="section-label">Compétences</span>
       <div class="field"><label for="pf-skills">Compétences / outils (séparés par des virgules)</label><input type="text" id="pf-skills" placeholder="Excel VBA, Power BI, SQL"></div>
@@ -173,10 +196,13 @@
       document.getElementById('pf-title').value = profile.title || '';
       document.getElementById('pf-category').value = profile.category || '';
       document.getElementById('pf-bio').value = profile.bio || '';
-      document.getElementById('pf-experience').value = profile.experience || '';
-      document.getElementById('pf-education').value = profile.education || '';
-      document.getElementById('pf-achievements').value = profile.achievements || '';
       document.getElementById('pf-skills').value = profile.skills || '';
+      document.getElementById('pf-proj-count').value = profile.proj_count != null ? profile.proj_count : '';
+      document.getElementById('pf-github').value = profile.github_url || '';
+      document.getElementById('pf-linkedin').value = profile.linkedin_url || '';
+      populateEntries('expContainer', createExpEntry, profile.exp_entries);
+      populateEntries('eduContainer', createEduEntry, profile.edu_entries);
+      populateEntries('projContainer', createProjEntry, profile.proj_entries);
       document.getElementById('pf-languages').value = profile.languages || '';
       document.getElementById('pf-interests').value = profile.interests || '';
       document.getElementById('pf-country').value = profile.country || '';
@@ -189,6 +215,9 @@
     } else {
       document.getElementById('pf-email').value = currentUser.email || '';
       document.getElementById('photoPreview').src = 'https://via.placeholder.com/88/EFEADB/003461?text=%20';
+      populateEntries('expContainer', createExpEntry, []);
+      populateEntries('eduContainer', createEduEntry, []);
+      populateEntries('projContainer', createProjEntry, []);
     }
 
     document.getElementById('viewProfileLink').href = 'profil.html?id=' + currentUser.id;
@@ -235,9 +264,12 @@
       title: document.getElementById('pf-title').value.trim(),
       category: document.getElementById('pf-category').value,
       bio: document.getElementById('pf-bio').value.trim(),
-      experience: document.getElementById('pf-experience').value.trim(),
-      education: document.getElementById('pf-education').value.trim(),
-      achievements: document.getElementById('pf-achievements').value.trim(),
+      exp_entries: collectExpEntries(),
+      edu_entries: collectEduEntries(),
+      proj_entries: collectProjEntries(),
+      proj_count: document.getElementById('pf-proj-count').value ? parseInt(document.getElementById('pf-proj-count').value, 10) : null,
+      github_url: document.getElementById('pf-github').value.trim(),
+      linkedin_url: document.getElementById('pf-linkedin').value.trim(),
       skills: document.getElementById('pf-skills').value.trim(),
       languages: document.getElementById('pf-languages').value.trim(),
       interests: document.getElementById('pf-interests').value.trim(),
@@ -284,6 +316,170 @@
       navToggle.classList.remove('open');
       navMobilePanel.classList.remove('open');
     });
+  });
+
+  // ============ STRUCTURED REPEATABLE ENTRIES ============
+  const EDU_LEVELS = ["Terminale","Bac+1","Bac+2","Bac+3 (Licence)","Bac+4","Bac+5 (Master)","Doctorat"];
+
+  function makeField(labelText, inputHtml) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.innerHTML = `<label>${labelText}</label>${inputHtml}`;
+    return wrap;
+  }
+
+  function makeRemoveBtn(card) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'entry-remove';
+    btn.textContent = '×';
+    btn.addEventListener('click', () => card.remove());
+    return btn;
+  }
+
+  function createExpEntry(data) {
+    data = data || {};
+    const card = document.createElement('div');
+    card.className = 'entry-card exp-entry';
+    card.appendChild(makeRemoveBtn(card));
+
+    const row1 = document.createElement('div');
+    row1.className = 'entry-row3';
+    const company = makeField('Nom de l\'entreprise', '<input type="text" class="exp-company">');
+    const position = makeField('Poste', '<input type="text" class="exp-position">');
+    row1.appendChild(company); row1.appendChild(position);
+    card.appendChild(row1);
+
+    const dateRow = document.createElement('div');
+    dateRow.className = 'date-row';
+    const start = makeField('Début', '<input type="month" class="exp-start">');
+    const end = makeField('Fin', '<input type="month" class="exp-end">');
+    const current = document.createElement('label');
+    current.className = 'current-check';
+    current.innerHTML = '<input type="checkbox" class="exp-current"> Poste actuel';
+    dateRow.appendChild(start); dateRow.appendChild(end); dateRow.appendChild(current);
+    card.appendChild(dateRow);
+
+    const desc = makeField('Missions effectuées', '<textarea class="exp-desc"></textarea>');
+    card.appendChild(desc);
+
+    const endInput = end.querySelector('.exp-end');
+    current.querySelector('.exp-current').addEventListener('change', (e) => {
+      endInput.disabled = e.target.checked;
+      if (e.target.checked) endInput.value = '';
+    });
+
+    card.querySelector('.exp-company').value = data.company || '';
+    card.querySelector('.exp-position').value = data.position || '';
+    card.querySelector('.exp-start').value = data.start || '';
+    card.querySelector('.exp-current').checked = !!data.current;
+    endInput.value = data.end || '';
+    endInput.disabled = !!data.current;
+    card.querySelector('.exp-desc').value = data.description || '';
+
+    return card;
+  }
+
+  function createEduEntry(data) {
+    data = data || {};
+    const card = document.createElement('div');
+    card.className = 'entry-card edu-entry';
+    card.appendChild(makeRemoveBtn(card));
+
+    const row1 = document.createElement('div');
+    row1.className = 'entry-row3';
+    const school = makeField('Nom de l\'école', '<input type="text" class="edu-school">');
+    const levelOptions = EDU_LEVELS.map(l => `<option value="${l}">${l}</option>`).join('');
+    const level = makeField('Niveau d\'étude', `<select class="edu-level"><option value="">Sélectionner</option>${levelOptions}</select>`);
+    row1.appendChild(school); row1.appendChild(level);
+    card.appendChild(row1);
+
+    const diploma = makeField('Titre du diplôme obtenu', '<input type="text" class="edu-diploma">');
+    card.appendChild(diploma);
+
+    const row2 = document.createElement('div');
+    row2.className = 'entry-row3';
+    const startEnd = document.createElement('div');
+    startEnd.className = 'date-row';
+    startEnd.style.gridTemplateColumns = '1fr 1fr';
+    const start = makeField('Début', '<input type="month" class="edu-start">');
+    const end = makeField('Fin', '<input type="month" class="edu-end">');
+    startEnd.appendChild(start); startEnd.appendChild(end);
+    const country = makeField('Pays d\'obtention', '<input type="text" class="edu-country">');
+    row2.appendChild(startEnd); row2.appendChild(country);
+    card.appendChild(row2);
+
+    card.querySelector('.edu-school').value = data.school || '';
+    card.querySelector('.edu-level').value = data.level || '';
+    card.querySelector('.edu-diploma').value = data.diploma || '';
+    card.querySelector('.edu-start').value = data.start || '';
+    card.querySelector('.edu-end').value = data.end || '';
+    card.querySelector('.edu-country').value = data.country || '';
+
+    return card;
+  }
+
+  function createProjEntry(data) {
+    data = data || {};
+    const card = document.createElement('div');
+    card.className = 'entry-card proj-entry';
+    card.appendChild(makeRemoveBtn(card));
+
+    const name = makeField('Nom du projet', '<input type="text" class="proj-name">');
+    card.appendChild(name);
+    const desc = makeField('Description', '<textarea class="proj-desc"></textarea>');
+    card.appendChild(desc);
+
+    card.querySelector('.proj-name').value = data.name || '';
+    card.querySelector('.proj-desc').value = data.description || '';
+
+    return card;
+  }
+
+  function populateEntries(containerId, createFn, entries) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    const list = (entries && entries.length) ? entries : [{}];
+    list.forEach(item => container.appendChild(createFn(item)));
+  }
+
+  function collectExpEntries() {
+    return Array.from(document.querySelectorAll('#expContainer .exp-entry')).map(card => ({
+      company: card.querySelector('.exp-company').value.trim(),
+      position: card.querySelector('.exp-position').value.trim(),
+      start: card.querySelector('.exp-start').value,
+      end: card.querySelector('.exp-end').value,
+      current: card.querySelector('.exp-current').checked,
+      description: card.querySelector('.exp-desc').value.trim()
+    })).filter(e => e.company || e.position || e.description);
+  }
+
+  function collectEduEntries() {
+    return Array.from(document.querySelectorAll('#eduContainer .edu-entry')).map(card => ({
+      school: card.querySelector('.edu-school').value.trim(),
+      level: card.querySelector('.edu-level').value,
+      diploma: card.querySelector('.edu-diploma').value.trim(),
+      start: card.querySelector('.edu-start').value,
+      end: card.querySelector('.edu-end').value,
+      country: card.querySelector('.edu-country').value.trim()
+    })).filter(e => e.school || e.diploma);
+  }
+
+  function collectProjEntries() {
+    return Array.from(document.querySelectorAll('#projContainer .proj-entry')).map(card => ({
+      name: card.querySelector('.proj-name').value.trim(),
+      description: card.querySelector('.proj-desc').value.trim()
+    })).filter(e => e.name || e.description);
+  }
+
+  document.getElementById('addExpBtn').addEventListener('click', () => {
+    document.getElementById('expContainer').appendChild(createExpEntry({}));
+  });
+  document.getElementById('addEduBtn').addEventListener('click', () => {
+    document.getElementById('eduContainer').appendChild(createEduEntry({}));
+  });
+  document.getElementById('addProjBtn').addEventListener('click', () => {
+    document.getElementById('projContainer').appendChild(createProjEntry({}));
   });
 
   init();
