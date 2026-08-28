@@ -35,6 +35,14 @@
   .p-chip-row{display:flex;flex-wrap:wrap;gap:8px;}
   .p-chip{font-family:var(--mono);font-size:12px;padding:7px 13px;border:1px solid var(--line);border-radius:20px;color:var(--navy);background:var(--cream-2);}
   .p-contact-row{display:flex;flex-direction:column;gap:10px;font-family:var(--mono);font-size:14px;}
+  .p-entries{display:flex;flex-direction:column;gap:20px;}
+  .p-entry{padding-left:16px;border-left:2px solid var(--line);}
+  .p-entry-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .p-entry-title{font-family:var(--display);font-weight:600;font-size:15px;color:var(--navy);}
+  .p-entry-sub{font-size:13.5px;color:var(--ink-soft);}
+  .p-entry-dates{font-family:var(--mono);font-size:11.5px;color:var(--orange-deep);margin-left:auto;white-space:nowrap;}
+  .p-entry-desc{font-size:13.5px;color:var(--ink-soft);white-space:pre-line;margin-top:6px;}
+  .p-proj-count{font-family:var(--mono);font-size:13px;color:var(--orange-deep);margin-bottom:16px;}
   .p-contact-row a{color:var(--navy);text-decoration:none;border-bottom:1px solid transparent;}
   .p-contact-row a:hover{color:var(--orange);border-color:var(--orange);}
   .contact-btn{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:13.5px;padding:14px 28px;border-radius:30px;background:var(--orange);color:#fff;text-decoration:none;transition:background .3s,transform .3s;}
@@ -64,15 +72,20 @@
     </div>
     <div class="p-section" id="experience-section">
       <span class="p-section-label">Expériences professionnelles</span>
-      <p id="p-experience"></p>
+      <div id="p-experience" class="p-entries"></div>
     </div>
     <div class="p-section" id="education-section">
       <span class="p-section-label">Parcours académique</span>
-      <p id="p-education"></p>
+      <div id="p-education" class="p-entries"></div>
     </div>
-    <div class="p-section" id="achievements-section">
-      <span class="p-section-label">Réalisations</span>
-      <p id="p-achievements"></p>
+    <div class="p-section" id="projects-section">
+      <span class="p-section-label">Projets réalisés</span>
+      <p id="p-proj-count" class="p-proj-count"></p>
+      <div id="p-projects" class="p-entries"></div>
+    </div>
+    <div class="p-section" id="links-section">
+      <span class="p-section-label">Liens professionnels</span>
+      <div class="p-contact-row" id="p-links"></div>
     </div>
     <div class="p-section" id="skills-section">
       <span class="p-section-label">Compétences</span>
@@ -119,6 +132,87 @@
     el.textContent = value;
   }
 
+  const MONTHS_FR = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+  function formatMonth(value) {
+    if (!value) return '';
+    const [y, m] = value.split('-');
+    const idx = parseInt(m, 10) - 1;
+    if (isNaN(idx) || !MONTHS_FR[idx]) return value;
+    return MONTHS_FR[idx] + ' ' + y;
+  }
+
+  function hideSectionIfEmpty(containerId, hasContent) {
+    const el = document.getElementById(containerId);
+    if (!hasContent) { el.closest('.p-section').style.display = 'none'; }
+  }
+
+  function renderExperiences(entries) {
+    const list = (entries || []).filter(e => e && (e.company || e.position || e.description));
+    const container = document.getElementById('p-experience');
+    hideSectionIfEmpty('p-experience', list.length > 0);
+    if (list.length === 0) return;
+    container.innerHTML = list.map(e => {
+      const dates = [formatMonth(e.start), e.current ? 'Présent' : formatMonth(e.end)].filter(Boolean).join(' – ');
+      return `
+        <div class="p-entry">
+          <div class="p-entry-head">
+            <span class="p-entry-title">${e.position || ''}</span>
+            <span class="p-entry-sub">${e.company ? '— ' + e.company : ''}</span>
+            ${dates ? `<span class="p-entry-dates">${dates}</span>` : ''}
+          </div>
+          ${e.description ? `<p class="p-entry-desc">${e.description}</p>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function renderEducation(entries) {
+    const list = (entries || []).filter(e => e && (e.school || e.diploma));
+    const container = document.getElementById('p-education');
+    hideSectionIfEmpty('p-education', list.length > 0);
+    if (list.length === 0) return;
+    container.innerHTML = list.map(e => {
+      const dates = [formatMonth(e.start), formatMonth(e.end)].filter(Boolean).join(' – ');
+      const subParts = [e.level, e.country].filter(Boolean).join(' · ');
+      return `
+        <div class="p-entry">
+          <div class="p-entry-head">
+            <span class="p-entry-title">${e.diploma || ''}</span>
+            <span class="p-entry-sub">${e.school ? '— ' + e.school : ''}</span>
+            ${dates ? `<span class="p-entry-dates">${dates}</span>` : ''}
+          </div>
+          ${subParts ? `<p class="p-entry-desc">${subParts}</p>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function renderProjects(entries, count) {
+    const list = (entries || []).filter(e => e && (e.name || e.description));
+    const container = document.getElementById('p-projects');
+    const countEl = document.getElementById('p-proj-count');
+    const hasContent = list.length > 0 || !!count;
+    hideSectionIfEmpty('p-projects', hasContent);
+    if (!hasContent) return;
+    if (count) {
+      countEl.textContent = count + (count > 1 ? ' projets réalisés au total' : ' projet réalisé');
+    } else {
+      countEl.style.display = 'none';
+    }
+    container.innerHTML = list.map(e => `
+      <div class="p-entry">
+        <div class="p-entry-head"><span class="p-entry-title">${e.name || ''}</span></div>
+        ${e.description ? `<p class="p-entry-desc">${e.description}</p>` : ''}
+      </div>`).join('');
+  }
+
+  function renderLinks(github, linkedin) {
+    const el = document.getElementById('p-links');
+    let html = '';
+    if (github) html += `<a href="${github}" target="_blank" rel="noopener">GitHub →</a>`;
+    if (linkedin) html += `<a href="${linkedin}" target="_blank" rel="noopener">LinkedIn →</a>`;
+    el.innerHTML = html;
+    if (!html) { el.closest('.p-section').style.display = 'none'; }
+  }
+
   async function loadProfile() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -134,9 +228,10 @@
     document.title = (data.full_name || 'Consultant') + ' — Softacess Solution';
 
     fillText('p-bio', data.bio);
-    fillText('p-experience', data.experience);
-    fillText('p-education', data.education);
-    fillText('p-achievements', data.achievements);
+    renderExperiences(data.exp_entries);
+    renderEducation(data.edu_entries);
+    renderProjects(data.proj_entries, data.proj_count);
+    renderLinks(data.github_url, data.linkedin_url);
     fillList('p-skills', data.skills);
     fillList('p-languages', data.languages);
     fillList('p-interests', data.interests);
